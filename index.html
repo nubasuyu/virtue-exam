@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Virtue College - Entrance Exam</title>
+    <style>
+        :root {
+            --deep-brown: #3E2723;
+            --cream: #FFF8E1;
+            --light-brown: #5D4037;
+            --accent-brown: #8D6E63;
+            --error-red: #c62828;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--deep-brown); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: var(--cream); padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 700px; user-select: none; border-top: 8px solid var(--light-brown); }
+        .school-header { text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid var(--accent-brown); }
+        .school-logo-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-brown); margin-bottom: 15px; }
+        .school-name { color: var(--deep-brown); font-size: 1.8rem; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { color: var(--deep-brown); text-align: center; margin-bottom: 20px; }
+        .input-field { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--accent-brown); border-radius: 6px; font-size: 1rem; box-sizing: border-box; background: #fff; color: var(--deep-brown); }
+        .input-field:focus { outline: none; border-color: var(--deep-brown); box-shadow: 0 0 5px rgba(62, 39, 35, 0.3); }
+        .timer { font-size: 1.5rem; color: var(--deep-brown); text-align: center; font-weight: bold; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 6px; border: 2px solid var(--accent-brown); }
+        .question-text { font-size: 1.15rem; margin-bottom: 20px; font-weight: 600; color: var(--deep-brown); line-height: 1.5; }
+        .subject-tag { display: inline-block; background: var(--deep-brown); color: var(--cream); padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 15px; font-weight: bold; }
+        .options label { display: block; padding: 12px; background: #fff; border: 2px solid var(--accent-brown); border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; color: var(--deep-brown); }
+        .options label:hover { background: var(--deep-brown); color: var(--cream); }
+        .options input { margin-right: 10px; }
+        .btn { background: var(--deep-brown); color: var(--cream); border: none; padding: 14px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; width: 100%; margin-top: 10px; font-weight: bold; transition: background 0.3s; text-transform: uppercase; }
+        .btn:hover { background: var(--light-brown); }
+        .btn-danger { background: var(--error-red); }
+        .btn-danger:hover { background: #b71c1c; }
+        .hidden { display: none; }
+        #warning-box { background: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; text-align: center; margin-bottom: 15px; display: none; border-left: 4px solid #ffc107; font-weight: bold; }
+        .progress { text-align: center; color: var(--light-brown); margin-bottom: 10px; font-weight: 600; }
+        .result-box { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid var(--deep-brown); }
+        .result-box h3 { color: var(--deep-brown); margin-top: 0; }
+        .score-display { font-size: 1.4rem; color: var(--deep-brown); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="container">
+    <div class="school-header">
+        <img src="logo.jpg" alt="The Virtue College Logo" class="school-logo-img">
+        <h1 class="school-name">The Virtue College</h1>
+    </div>
+    <h2>Entrance Examination Portal</h2>
+    <input type="text" id="student-name" class="input-field" placeholder="Full Name">
+    <input type="email" id="student-email" class="input-field" placeholder="Email Address">
+    <select id="class-select" class="input-field">
+        <option value="">-- Select Class --</option>
+        <option value="JSS1">Junior Secondary 1 (JSS1)</option>
+        <option value="JSS2">Junior Secondary 2 (JSS2)</option>
+        <option value="JSS3">Junior Secondary 3 (JSS3)</option>
+        <option value="SSS1">Senior Secondary 1 (SSS1)</option>
+        <option value="SSS2">Senior Secondary 2 (SSS2)</option>
+    </select>
+    <input type="text" id="access-code" class="input-field" placeholder="Enter Unique Access Code (e.g., VIRTUE-1234)" style="text-transform: uppercase;">
+    <div style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; color: var(--light-brown); border: 1px solid var(--accent-brown);">
+        <strong>Exam Details:</strong><br>
+        • Duration: 60 minutes<br>
+        • Total Questions: 50 (25 English + 25 Mathematics)<br>
+        • Ensure you are in a quiet, private room.
+    </div>
+    <button class="btn" onclick="startExam()">Start Examination</button>
+</div>
+
+<!-- EXAM SCREEN -->
+<div id="exam-screen" class="container hidden">
+    <div class="school-header" style="margin-bottom: 15px; padding-bottom: 10px;">
+        <h1 class="school-name" style="font-size: 1.2rem;">The Virtue College</h1>
+    </div>
+    <div id="warning-box">⚠️ Violation detected! (<span id="violation-count">0</span>/3)</div>
+    <div class="timer">⏱️ Time Left: <span id="time-left">60:00</span></div>
+    <div class="progress">Question <span id="current-q">1</span> of <span id="total-q">50</span></div>
+    <div id="subject-tag" class="subject-tag"></div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options" id="options-container"></div>
+    <button class="btn" id="next-btn" onclick="nextQuestion()">Next Question</button>
+    <button class="btn btn-danger" onclick="submitExam()">Submit Examination</button>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen" class="container hidden">
+    <div class="school-header">
+        <img src="logo.jpg" alt="The Virtue College Logo" class="school-logo-img">
+        <h1 class="school-name">The Virtue College</h1>
+    </div>
+    <h2>Examination Completed</h2>
+    <div class="result-box">
+        <h3>Overall Performance</h3>
+        <p class="score-display">Total Score: <span id="final-score">0</span> / 50</p>
+    </div>
+    <div class="result-box">
+        <h3>Subject Breakdown</h3>
+        <p><strong>English:</strong> <span id="english-score">0</span> / 25</p>
+        <p><strong>Mathematics:</strong> <span id="math-score">0</span> / 25</p>
+    </div>
+    <p id="result-message" style="text-align:center; font-weight:bold; font-size: 1.1rem; color: var(--deep-brown);"></p>
+    <p style="text-align:center; color:var(--light-brown); margin-top: 20px;">Your results have been securely submitted.</p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+    // --- 1. FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAMQwgABNTfQmrewip6KUn1Ac96R6ak6oo",
+        authDomain: "virtue-college-entrance-exam.firebaseapp.com",
+        projectId: "virtue-college-entrance-exam",
+        storageBucket: "virtue-college-entrance-exam.firebasestorage.app",
+        messagingSenderId: "436129403047",
+        appId: "1:436129403047:web:f93d9fe322be13fa258b82"
+
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // --- 2. QUESTION BANK ---
+    const questionBank = {
+        "JSS1": [
+            { id: 1, subject: "English", question: "Choose the correct synonym for 'Abundant'.", options: ["Scarce", "Plentiful", "Empty", "Lacking"], answer: 1 },
+            { id: 2, subject: "English", question: "Identify the noun: 'The dog barked loudly.'", options: ["barked", "loudly", "dog", "The"], answer: 2 },
+            { id: 3, subject: "English", question: "Which is correct spelling?", options: ["Accomodation", "Accommodation", "Acomodation", "Acommodation"], answer: 1 },
+            { id: 4, subject: "English", question: "Plural of 'Child'?", options: ["Childs", "Childrens", "Children", "Childes"], answer: 2 },
+            { id: 5, subject: "English", question: "Correct pronoun: '___ is going.'", options: ["Him", "He", "His", "Her"], answer: 1 },
+            { id: 6, subject: "English", question: "Which is an adjective?", options: ["Quickly", "Beautiful", "Run", "House"], answer: 1 },
+            { id: 7, subject: "English", question: "Opposite of 'Brave'?", options: ["Cowardly", "Bold", "Strong", "Fearless"], answer: 0 },
+            { id: 8, subject: "English", question: "Identify the verb: 'She sings.'", options: ["She", "sings", "beautifully", "None"], answer: 1 },
+            { id: 9, subject: "English", question: "Correct article: 'I saw ___ elephant.'", options: ["a", "an", "the", "no article"], answer: 1 },
+            { id: 10, subject: "English", question: "Which is correct?", options: ["He don't know.", "He doesn't knows.", "He doesn't know.", "He not know."], answer: 2 },
+            { id: 11, subject: "English", question: "Past tense of 'go'?", options: ["goed", "went", "gone", "going"], answer: 1 },
+            { id: 12, subject: "English", question: "Homophone: 'I ___ the movie.'", options: ["saw", "so", "sew", "sore"], answer: 0 },
+            { id: 13, subject: "English", question: "Compound sentence?", options: ["I ran.", "I ran fast.", "I ran fast, and I won.", "Running fast."], answer: 2 },
+            { id: 14, subject: "English", question: "Comparative of 'good'?", options: ["gooder", "better", "best", "more good"], answer: 1 },
+            { id: 15, subject: "English", question: "Adverb: 'He runs quickly.'", options: ["He", "runs", "quickly", "None"], answer: 2 },
+            { id: 16, subject: "English", question: "Preposition: 'Book is ___ the table.'", options: ["in", "on", "at", "by"], answer: 1 },
+            { id: 17, subject: "English", question: "Antonym of 'happy'?", options: ["joyful", "sad", "glad", "cheerful"], answer: 1 },
+            { id: 18, subject: "English", question: "Conjunction?", options: ["quick", "and", "beautiful", "run"], answer: 1 },
+            { id: 19, subject: "English", question: "Possessive: 'The dog wagged ___ tail.'", options: ["it's", "its", "its'", "it"], answer: 1 },
+            { id: 20, subject: "English", question: "Superlative of 'big'?", options: ["bigger", "biggest", "most big", "more big"], answer: 1 },
+            { id: 21, subject: "English", question: "Subject: 'The cat slept.'", options: ["slept", "The", "cat", "None"], answer: 2 },
+            { id: 22, subject: "English", question: "Which is correct?", options: ["Their going.", "They're going.", "There going.", "Theyre going."], answer: 1 },
+            { id: 23, subject: "English", question: "Plural of 'mouse'?", options: ["mouses", "mice", "mouse", "mices"], answer: 1 },
+            { id: 24, subject: "English", question: "Correct spelling:", options: ["Recieve", "Receive", "Receeve", "Receve"], answer: 1 },
+            { id: 25, subject: "English", question: "Correct punctuation?", options: ["Hello how are you", "Hello, how are you?", "Hello how are you.", "hello, how are you"], answer: 1 },
+            { id: 26, subject: "Math", question: "Value of x if 2x + 5 = 15?", options: ["5", "10", "7", "3"], answer: 0 },
+            { id: 27, subject: "Math", question: "Simplify: 3/4 + 1/4", options: ["1", "4/8", "2/4", "1/2"], answer: 0 },
+            { id: 28, subject: "Math", question: "Area of rectangle (5cm x 3cm)?", options: ["8cm²", "15cm²", "16cm²", "10cm²"], answer: 1 },
+            { id: 29, subject: "Math", question: "LCM of 4 and 6?", options: ["24", "12", "10", "2"], answer: 1 },
+            { id: 30, subject: "Math", question: "0.75 as a fraction?", options: ["1/2", "3/4", "7/5", "3/5"], answer: 1 },
+            { id: 31, subject: "Math", question: "$20 discounted by 10%?", options: ["$18", "$15", "$10", "$19"], answer: 0 },
+            { id: 32, subject: "Math", question: "Square root of 144?", options: ["14", "12", "11", "13"], answer: 1 },
+            { id: 33, subject: "Math", question: "Solve: 5 * (4 + 2)", options: ["22", "30", "20", "12"], answer: 1 },
+            { id: 34, subject: "Math", question: "Minutes in 2.5 hours?", options: ["120", "150", "130", "140"], answer: 1 },
+            { id: 35, subject: "Math", question: "Perimeter of square (side 6cm)?", options: ["12cm", "36cm", "24cm", "18cm"], answer: 2 },
+            { id: 36, subject: "Math", question: "15% of 200?", options: ["15", "20", "30", "25"], answer: 2 },
+            { id: 37, subject: "Math", question: "Simplify: 2/3 + 1/6", options: ["3/9", "5/6", "3/6", "1/2"], answer: 1 },
+            { id: 38, subject: "Math", question: "HCF of 12 and 18?", options: ["3", "6", "9", "12"], answer: 1 },
+            { id: 39, subject: "Math", question: "If x = 3, what is 2x² + 1?", options: ["13", "19", "7", "10"], answer: 1 },
+            { id: 40, subject: "Math", question: "Circumference (r=7, π=22/7)?", options: ["22cm", "44cm", "154cm", "88cm"], answer: 1 },
+            { id: 41, subject: "Math", question: "3/5 as a decimal?", options: ["0.3", "0.5", "0.6", "0.8"], answer: 2 },
+            { id: 42, subject: "Math", question: "25% of 80?", options: ["10", "15", "20", "25"], answer: 2 },
+            { id: 43, subject: "Math", question: "Solve: 8 - 3 * 2", options: ["10", "2", "14", "4"], answer: 1 },
+            { id: 44, subject: "Math", question: "Volume of cube (side 4cm)?", options: ["16cm³", "64cm³", "48cm³", "32cm³"], answer: 1 },
+            { id: 45, subject: "Math", question: "If 3x = 27, x = ?", options: ["6", "9", "3", "24"], answer: 1 },
+            { id: 46, subject: "Math", question: "Average of 10, 20, 30?", options: ["15", "20", "25", "30"], answer: 1 },
+            { id: 47, subject: "Math", question: "Simplify: 5/8 - 1/4", options: ["4/8", "3/8", "1/2", "1/4"], answer: 1 },
+            { id: 48, subject: "Math", question: "What is 2³?", options: ["6", "8", "9", "4"], answer: 1 },
+            { id: 49, subject: "Math", question: "If a=5, b=3, a+b=?", options: ["8", "15", "2", "53"], answer: 0 },
+            { id: 50, subject: "Math", question: "Next number: 2, 4, 6, 8, ___?", options: ["9", "10", "11", "12"], answer: 1 }
+        ],
+        "JSS2": [
+            { id: 1, subject: "English", question: "Choose the correct synonym for 'Benevolent'.", options: ["Cruel", "Kind", "Angry", "Selfish"], answer: 1 },
+            { id: 2, subject: "English", question: "Identify the conjunction: 'I wanted to go, but I was tired.'", options: ["wanted", "go", "but", "tired"], answer: 2 },
+            { id: 3, subject: "English", question: "What is the past participle of 'write'?", options: ["wrote", "written", "writing", "writed"], answer: 1 },
+            { id: 4, subject: "English", question: "Which sentence uses the correct comma?", options: ["My brother who is tall plays basketball.", "My brother, who is tall, plays basketball.", "My brother who is tall, plays basketball.", "My, brother who is tall plays basketball."], answer: 1 },
+            { id: 5, subject: "English", question: "What is the antonym of 'Ancient'?", options: ["Old", "Modern", "Historic", "Antique"], answer: 1 },
+            { id: 6, subject: "English", question: "Identify the adverb: 'She spoke softly.'", options: ["She", "spoke", "softly", "None"], answer: 2 },
+            { id: 7, subject: "English", question: "Choose the correct spelling:", options: ["Neccessary", "Necessary", "Necesary", "Neccesary"], answer: 1 },
+            { id: 8, subject: "English", question: "What is a group of lions called?", options: ["Pack", "Herd", "Pride", "Flock"], answer: 2 },
+            { id: 9, subject: "English", question: "Which word is a pronoun?", options: ["Quickly", "She", "Beautiful", "Run"], answer: 1 },
+            { id: 10, subject: "English", question: "What is the plural of 'Cactus'?", options: ["Cactuses", "Cacti", "Cactus", "Cacties"], answer: 1 },
+            { id: 11, subject: "English", question: "Identify the preposition: 'The cat is under the table.'", options: ["cat", "is", "under", "table"], answer: 2 },
+            { id: 12, subject: "English", question: "Choose the correct verb tense: 'Yesterday, I ___ to the store.'", options: ["go", "gone", "went", "going"], answer: 2 },
+            { id: 13, subject: "English", question: "What is the meaning of the idiom 'Break a leg'?", options: ["Get injured", "Good luck", "Be careful", "Walk slowly"], answer: 1 },
+            { id: 14, subject: "English", question: "Which sentence is in the passive voice?", options: ["The dog bit the man.", "The man was bitten by the dog.", "The dog is biting.", "The man bites the dog."], answer: 1 },
+            { id: 15, subject: "English", question: "What is the comparative form of 'bad'?", options: ["badder", "worse", "worst", "more bad"], answer: 1 },
+            { id: 16, subject: "English", question: "Identify the subject: 'The tall man is my uncle.'", options: ["is", "my uncle", "The tall man", "tall"], answer: 2 },
+            { id: 17, subject: "English", question: "Which word is an interjection?", options: ["Wow!", "Quickly", "And", "Under"], answer: 0 },
+            { id: 18, subject: "English", question: "Choose the correct spelling:", options: ["Definately", "Definetly", "Definitely", "Definitly"], answer: 2 },
+            { id: 19, subject: "English", question: "What is the opposite of 'Expand'?", options: ["Grow", "Contract", "Increase", "Widen"], answer: 1 },
+            { id: 20, subject: "English", question: "Which sentence is a question?", options: ["Close the door.", "I like apples.", "Where are you going?", "He is running."], answer: 2 },
+            { id: 21, subject: "English", question: "What is the plural of 'Phenomenon'?", options: ["Phenomenons", "Phenomena", "Phenomenas", "Phenomenies"], answer: 1 },
+            { id: 22, subject: "English", question: "Identify the object: 'She kicked the ball.'", options: ["She", "kicked", "the ball", "ball"], answer: 2 },
+            { id: 23, subject: "English", question: "Choose the correct homophone: 'The weather is ___ today.'", options: ["fine", "find", "fined", "finely"], answer: 0 },
+            { id: 24, subject: "English", question: "What type of sentence is 'Stop talking!'?", options: ["Declarative", "Interrogative", "Imperative", "Exclamatory"], answer: 2 },
+            { id: 25, subject: "English", question: "Which word is a noun?", options: ["Happiness", "Happy", "Happily", "Happier"], answer: 0 },
+            { id: 26, subject: "Math", question: "Solve: 3x - 7 = 14", options: ["7", "5", "3", "21"], answer: 0 },
+            { id: 27, subject: "Math", question: "What is the area of a triangle with base 10cm and height 5cm?", options: ["50cm²", "25cm²", "15cm²", "30cm²"], answer: 1 },
+            { id: 28, subject: "Math", question: "Simplify: 2a + 3b - a + 2b", options: ["a + 5b", "3a + 5b", "a + b", "2a + 5b"], answer: 0 },
+            { id: 29, subject: "Math", question: "Convert 0.2 to a percentage.", options: ["2%", "20%", "0.2%", "200%"], answer: 1 },
+            { id: 30, subject: "Math", question: "What is the sum of angles in a triangle?", options: ["90°", "180°", "270°", "360°"], answer: 1 },
+            { id: 31, subject: "Math", question: "Evaluate: (-3) × (-4)", options: ["-12", "12", "-7", "7"], answer: 1 },
+            { id: 32, subject: "Math", question: "What is the square root of 81?", options: ["7", "8", "9", "10"], answer: 2 },
+            { id: 33, subject: "Math", question: "Solve: x/4 = 5", options: ["10", "15", "20", "25"], answer: 2 },
+            { id: 34, subject: "Math", question: "What is 10% of 500?", options: ["10", "50", "100", "5"], answer: 1 },
+            { id: 35, subject: "Math", question: "Simplify: 4² + 3²", options: ["12", "25", "7", "49"], answer: 1 },
+            { id: 36, subject: "Math", question: "Find the mean of 4, 8, 12.", options: ["6", "8", "10", "12"], answer: 1 },
+            { id: 37, subject: "Math", question: "What is the perimeter of a rectangle (L=8, W=4)?", options: ["12", "24", "32", "16"], answer: 1 },
+            { id: 38, subject: "Math", question: "Solve: 2(x + 3) = 10", options: ["2", "3", "4", "5"], answer: 0 },
+            { id: 39, subject: "Math", question: "What is the LCM of 5 and 10?", options: ["5", "10", "15", "50"], answer: 1 },
+            { id: 40, subject: "Math", question: "Convert 3/4 to a decimal.", options: ["0.25", "0.5", "0.75", "0.8"], answer: 2 },
+            { id: 41, subject: "Math", question: "What is the HCF of 15 and 20?", options: ["3", "4", "5", "10"], answer: 2 },
+            { id: 42, subject: "Math", question: "Simplify: 5x - 2x", options: ["3", "3x", "7x", "5x"], answer: 1 },
+            { id: 43, subject: "Math", question: "What is 1/2 + 1/3?", options: ["2/5", "5/6", "1/5", "2/3"], answer: 1 },
+            { id: 44, subject: "Math", question: "If y = 2x + 1, find y when x = 4.", options: ["7", "8", "9", "10"], answer: 2 },
+            { id: 45, subject: "Math", question: "What is the volume of a cuboid (L=2, W=3, H=4)?", options: ["9", "12", "24", "36"], answer: 2 },
+            { id: 46, subject: "Math", question: "Solve: 15 - 2x = 5", options: ["2", "5", "10", "15"], answer: 1 },
+            { id: 47, subject: "Math", question: "What is the next prime number after 7?", options: ["8", "9", "10", "11"], answer: 3 },
+            { id: 48, subject: "Math", question: "Calculate: 100  4", options: ["20", "25", "30", "40"], answer: 1 },
+            { id: 49, subject: "Math", question: "What is the area of a square with side 9cm?", options: ["18cm²", "36cm²", "81cm²", "72cm²"], answer: 2 },
+            { id: 50, subject: "Math", question: "Simplify: (10 × 2) - (5 + 3)", options: ["12", "15", "17", "20"], answer: 0 }
+        ],
+        "JSS3": [
+            { id: 1, subject: "English", question: "Choose the word nearest in meaning to 'Candid'.", options: ["Secretive", "Frank", "Dishonest", "Shy"], answer: 1 },
+            { id: 2, subject: "English", question: "Identify the figure of speech: 'The world is a stage.'", options: ["Simile", "Metaphor", "Personification", "Hyperbole"], answer: 1 },
+            { id: 3, subject: "English", question: "Which is the correct spelling?", options: ["Embarassment", "Embarrassment", "Embarasment", "Embarrasment"], answer: 1 },
+            { id: 4, subject: "English", question: "What is the collective noun for 'fish'?", options: ["School", "Flock", "Herd", "Pack"], answer: 0 },
+            { id: 5, subject: "English", question: "Choose the correct tag question: 'She is coming, ___?'", options: ["is she", "isn't she", "doesn't she", "won't she"], answer: 1 },
+            { id: 6, subject: "English", question: "Identify the infinitive: 'He wants to sleep.'", options: ["wants", "to sleep", "He", "None"], answer: 1 },
+            { id: 7, subject: "English", question: "What is the antonym of 'Transparent'?", options: ["Clear", "Opaque", "Visible", "Bright"], answer: 1 },
+            { id: 8, subject: "English", question: "Which sentence has correct subject-verb agreement?", options: ["The boys is playing.", "The boys are playing.", "The boys am playing.", "The boys be playing."], answer: 1 },
+            { id: 9, subject: "English", question: "What does the idiom 'Hit the nail on the head' mean?", options: ["To build something", "To be exactly right", "To hurt someone", "To work hard"], answer: 1 },
+            { id: 10, subject: "English", question: "Identify the gerund: 'Swimming is fun.'", options: ["is", "fun", "Swimming", "None"], answer: 2 },
+            { id: 11, subject: "English", question: "Choose the correct preposition: 'He is good ___ mathematics.'", options: ["in", "at", "on", "for"], answer: 1 },
+            { id: 12, subject: "English", question: "What is the plural of 'Criteria'?", options: ["Criterias", "Criterion", "Criterions", "Criterias"], answer: 1 },
+            { id: 13, subject: "English", question: "Which word is an adverb of frequency?", options: ["Quickly", "Always", "Here", "Very"], answer: 1 },
+            { id: 14, subject: "English", question: "Choose the correct spelling:", options: ["Occurence", "Occurrence", "Ocurrence", "Occurrance"], answer: 1 },
+            { id: 15, subject: "English", question: "What is the synonym of 'Meticulous'?", options: ["Careless", "Careful", "Lazy", "Fast"], answer: 1 },
+            { id: 16, subject: "English", question: "Identify the clause: 'When the bell rang'", options: ["Main clause", "Subordinate clause", "Noun clause", "Relative clause"], answer: 1 },
+            { id: 17, subject: "English", question: "Which sentence is in the future tense?", options: ["I eat.", "I ate.", "I will eat.", "I have eaten."], answer: 2 },
+            { id: 18, subject: "English", question: "What is the opposite of 'Optimistic'?", options: ["Hopeful", "Pessimistic", "Cheerful", "Positive"], answer: 1 },
+            { id: 19, subject: "English", question: "Choose the correct article: 'He is ___ honest man.'", options: ["a", "an", "the", "no article"], answer: 1 },
+            { id: 20, subject: "English", question: "What is a person who writes poems called?", options: ["Author", "Poet", "Novelist", "Playwright"], answer: 1 },
+            { id: 21, subject: "English", question: "Identify the conjunction: 'I will go if you go.'", options: ["will", "go", "if", "you"], answer: 2 },
+            { id: 22, subject: "English", question: "Which is the correct past tense of 'teach'?", options: ["teached", "taught", "teaching", "teaches"], answer: 1 },
+            { id: 23, subject: "English", question: "What is the meaning of 'Brevity'?", options: ["Length", "Shortness", "Complexity", "Detail"], answer: 1 },
+            { id: 24, subject: "English", question: "Choose the correct pronoun: 'Between you and ___.'", options: ["I", "me", "my", "mine"], answer: 1 },
+            { id: 25, subject: "English", question: "What type of noun is 'London'?", options: ["Common", "Proper", "Abstract", "Collective"], answer: 1 },
+            { id: 26, subject: "Math", question: "Solve the simultaneous equations: x + y = 5, x - y = 1", options: ["x=2, y=3", "x=3, y=2", "x=4, y=1", "x=1, y=4"], answer: 1 },
+            { id: 27, subject: "Math", question: "Factorize: x² - 9", options: ["(x-3)(x-3)", "(x+3)(x+3)", "(x-3)(x+3)", "(x-9)(x+1)"], answer: 2 },
+            { id: 28, subject: "Math", question: "Find the value of x: 2x² = 32", options: ["2", "4", "8", "16"], answer: 1 },
+            { id: 29, subject: "Math", question: "What is the sum of interior angles of a quadrilateral?", options: ["180°", "270°", "360°", "540°"], answer: 2 },
+            { id: 30, subject: "Math", question: "Calculate the simple interest on $1000 at 5% for 2 years.", options: ["$50", "$100", "$150", "$200"], answer: 1 },
+            { id: 31, subject: "Math", question: "Simplify: (2x³)²", options: ["2x⁶", "4x⁶", "4x⁵", "2x⁵"], answer: 1 },
+            { id: 32, subject: "Math", question: "If sin A = 3/5, what is cos A?", options: ["3/4", "4/5", "5/3", "5/4"], answer: 1 },
+            { id: 33, subject: "Math", question: "Find the median of: 3, 5, 7, 9, 11.", options: ["5", "7", "9", "11"], answer: 1 },
+            { id: 34, subject: "Math", question: "What is the probability of getting a head when a coin is tossed?", options: ["1/4", "1/3", "1/2", "1"], answer: 2 },
+            { id: 35, subject: "Math", question: "Solve: 3(x - 2) = 12", options: ["4", "5", "6", "7"], answer: 2 },
+            { id: 36, subject: "Math", question: "Convert 0.125 to a fraction.", options: ["1/4", "1/8", "1/5", "1/10"], answer: 1 },
+            { id: 37, subject: "Math", question: "What is the area of a circle with radius 14cm? (π=22/7)", options: ["44cm²", "88cm²", "616cm²", "154cm²"], answer: 2 },
+            { id: 38, subject: "Math", question: "Evaluate: 5⁰", options: ["0", "1", "5", "25"], answer: 1 },
+            { id: 39, subject: "Math", question: "Find the mode of: 2, 3, 3, 4, 5.", options: ["2", "3", "4", "5"], answer: 1 },
+            { id: 40, subject: "Math", question: "Simplify: 50", options: ["2√5", "5√2", "10√5", "25√2"], answer: 1 },
+            { id: 41, subject: "Math", question: "If a = 2, b = 3, find a² + b².", options: ["5", "10", "13", "25"], answer: 2 },
+            { id: 42, subject: "Math", question: "What is the gradient of the line y = 3x + 2?", options: ["2", "3", "5", "-3"], answer: 1 },
+            { id: 43, subject: "Math", question: "Solve: x/2 + x/3 = 5", options: ["4", "5", "6", "10"], answer: 2 },
+            { id: 44, subject: "Math", question: "What is the volume of a cylinder (r=7, h=10, π=22/7)?", options: ["1540cm³", "440cm³", "154cm³", "2200cm³"], answer: 0 },
+            { id: 45, subject: "Math", question: "Find the range of: 10, 15, 20, 25.", options: ["10", "15", "20", "25"], answer: 1 },
+            { id: 46, subject: "Math", question: "Simplify: 2⁻²", options: ["-4", "4", "1/4", "-1/4"], answer: 2 },
+            { id: 47, subject: "Math", question: "What is the next term in the sequence: 1, 4, 9, 16, ___?", options: ["20", "25", "30", "36"], answer: 1 },
+            { id: 48, subject: "Math", question: "Calculate: 15% of 300", options: ["30", "45", "60", "15"], answer: 1 },
+            { id: 49, subject: "Math", question: "If 2x + 3y = 12 and x = 3, find y.", options: ["1", "2", "3", "4"], answer: 1 },
+            { id: 50, subject: "Math", question: "What is the HCF of 24 and 36?", options: ["6", "12", "18", "24"], answer: 1 }
+        ],
+        "SSS1": [
+            { id: 1, subject: "English", question: "Choose the word that best completes: 'The politician's speech was full of _____.", options: ["veracity", "platitudes", "clarity", "brevity"], answer: 1 },
+            { id: 2, subject: "English", question: "Identify the figure of speech: 'He is a night owl.'", options: ["Simile", "Metaphor", "Personification", "Hyperbole"], answer: 1 },
+            { id: 3, subject: "English", question: "Which of these is an example of a complex sentence?", options: ["I ran fast.", "I ran fast, but I missed the bus.", "Although I ran fast, I missed the bus.", "Running fast and missing the bus."], answer: 2 },
+            { id: 4, subject: "English", question: "What is the meaning of the idiom 'To let the cat out of the bag'?", options: ["To free a cat", "To reveal a secret", "To make a mistake", "To go shopping"], answer: 1 },
+            { id: 5, subject: "English", question: "Choose the correct passive voice: 'They are building a house.'", options: ["A house is built by them.", "A house is being built by them.", "A house was built by them.", "A house has been built by them."], answer: 1 },
+            { id: 6, subject: "English", question: "Which word is a conjunction?", options: ["Quickly", "Although", "Beautiful", "Under"], answer: 1 },
+            { id: 7, subject: "English", question: "Identify the mood of the verb: 'If I were rich, I would travel.'", options: ["Indicative", "Imperative", "Subjunctive", "Infinitive"], answer: 2 },
+            { id: 8, subject: "English", question: "What is the antonym of 'Obsolete'?", options: ["Outdated", "Modern", "Ancient", "Useless"], answer: 1 },
+            { id: 9, subject: "English", question: "Choose the correct spelling:", options: ["Conscientious", "Consciencious", "Conscentious", "Conscentious"], answer: 0 },
+            { id: 10, subject: "English", question: "'The wind howled in the night.' This is an example of:", options: ["Metaphor", "Simile", "Personification", "Irony"], answer: 2 },
+            { id: 11, subject: "English", question: "What is the meaning of 'Ephemeral'?", options: ["Lasting forever", "Short-lived", "Beautiful", "Ugly"], answer: 1 },
+            { id: 12, subject: "English", question: "Choose the correct reported speech: 'He said, \"I am happy.\"'", options: ["He said that he is happy.", "He said that he was happy.", "He said that I am happy.", "He said that I was happy."], answer: 1 },
+            { id: 13, subject: "English", question: "Which is a compound-complex sentence?", options: ["I ran.", "I ran and won.", "Although I ran, I won, and I celebrated.", "Running and winning."], answer: 2 },
+            { id: 14, subject: "English", question: "What is the figure of speech in 'Her smile was like sunshine'?", options: ["Metaphor", "Simile", "Personification", "Hyperbole"], answer: 1 },
+            { id: 15, subject: "English", question: "Choose the correct tense: 'By next year, I ___ graduated.'", options: ["will", "will have", "would", "have"], answer: 1 },
+            { id: 16, subject: "English", question: "What is the synonym of 'Ubiquitous'?", options: ["Rare", "Omnipresent", "Hidden", "Unique"], answer: 1 },
+            { id: 17, subject: "English", question: "Identify the clause type: 'Because it rained'", options: ["Independent", "Dependent", "Main", "Coordinate"], answer: 1 },
+            { id: 18, subject: "English", question: "What is the meaning of 'To burn the midnight oil'?", options: ["To waste oil", "To work late at night", "To cook at night", "To start a fire"], answer: 1 },
+            { id: 19, subject: "English", question: "Choose the correct conditional: 'If I ___ you, I would apologize.'", options: ["am", "was", "were", "be"], answer: 2 },
+            { id: 20, subject: "English", question: "Which is an example of alliteration?", options: ["The sun set.", "She sells seashells.", "He is a lion.", "The wind whispered."], answer: 1 },
+            { id: 21, subject: "English", question: "What is the antonym of 'Benevolent'?", options: ["Kind", "Malevolent", "Generous", "Charitable"], answer: 1 },
+            { id: 22, subject: "English", question: "Choose the correct usage:", options: ["Its a beautiful day.", "It's a beautiful day.", "Its' a beautiful day.", "It is' a beautiful day."], answer: 1 },
+            { id: 23, subject: "English", question: "What literary device is 'The camera loves her'?", options: ["Metaphor", "Simile", "Personification", "Irony"], answer: 2 },
+            { id: 24, subject: "English", question: "Which sentence uses the subjunctive mood correctly?", options: ["I wish I was taller.", "I wish I were taller.", "I wish I am taller.", "I wish I be taller."], answer: 1 },
+            { id: 25, subject: "English", question: "What is the meaning of 'Sanguine'?", options: ["Sad", "Optimistic", "Angry", "Confused"], answer: 1 },
+            { id: 26, subject: "Math", question: "Solve for x: x² - 5x + 6 = 0", options: ["2, 3", "-2, -3", "1, 6", "-1, -6"], answer: 0 },
+            { id: 27, subject: "Math", question: "What is the logarithm of 1000 to base 10?", options: ["2", "3", "10", "100"], answer: 1 },
+            { id: 28, subject: "Math", question: "If sin(θ) = 0.5, what is θ in degrees (for acute angles)?", options: ["30°", "45°", "60°", "90°"], answer: 0 },
+            { id: 29, subject: "Math", question: "What is the derivative of x³?", options: ["x²", "3x²", "3x", "x⁴/4"], answer: 1 },
+            { id: 30, subject: "Math", question: "If A = {1, 2, 3} and B = {2, 3, 4}, what is A ∩ B?", options: ["{1, 2, 3, 4}", "{2, 3}", "{1, 4}", "{}"], answer: 1 },
+            { id: 31, subject: "Math", question: "Simplify: (2³)²", options: ["32", "64", "16", "12"], answer: 1 },
+            { id: 32, subject: "Math", question: "What is the gradient of the line y = 4x - 7?", options: ["-7", "4", "7", "-4"], answer: 1 },
+            { id: 33, subject: "Math", question: "In a right-angled triangle, if opposite = 3 and adjacent = 4, what is tan(θ)?", options: ["3/4", "4/3", "3/5", "4/5"], answer: 0 },
+            { id: 34, subject: "Math", question: "Solve the inequality: 2x - 3 > 5", options: ["x > 1", "x > 4", "x < 4", "x > 2"], answer: 1 },
+            { id: 35, subject: "Math", question: "What is the sum of the interior angles of a hexagon?", options: ["360°", "540°", "720°", "900°"], answer: 2 },
+            { id: 36, subject: "Math", question: "What is the value of log₂(8)?", options: ["2", "3", "4", "8"], answer: 1 },
+            { id: 37, subject: "Math", question: "If f(x) = 2x + 3, what is f(5)?", options: ["10", "13", "8", "15"], answer: 1 },
+            { id: 38, subject: "Math", question: "What is the integral of 2x?", options: ["x²", "x² + C", "2x²", "2x² + C"], answer: 1 },
+            { id: 39, subject: "Math", question: "Solve: 3^x = 81", options: ["2", "3", "4", "5"], answer: 2 },
+            { id: 40, subject: "Math", question: "What is the equation of a circle with center (0,0) and radius 5?", options: ["x² + y² = 5", "x² + y² = 25", "x + y = 5", "(x-5)² + y² = 25"], answer: 1 },
+            { id: 41, subject: "Math", question: "If cos(θ) = 0.8, what is sin(θ)? (for acute angles)", options: ["0.6", "0.4", "0.5", "0.7"], answer: 0 },
+            { id: 42, subject: "Math", question: "What is the determinant of matrix [[2, 3], [1, 4]]?", options: ["5", "8", "11", "6"], answer: 1 },
+            { id: 43, subject: "Math", question: "Simplify: (x² - 9) / (x + 3)", options: ["x - 3", "x + 3", "x² - 3", "x - 9"], answer: 0 },
+            { id: 44, subject: "Math", question: "What is the nth term of the arithmetic sequence: 3, 7, 11, 15, ...?", options: ["4n - 1", "4n + 1", "3n", "4n"], answer: 0 },
+            { id: 45, subject: "Math", question: "If log(x) = 2, what is x?", options: ["2", "10", "100", "20"], answer: 2 },
+            { id: 46, subject: "Math", question: "What is the range of the function f(x) = x²?", options: ["All real numbers", "x ≥ 0", "x > 0", "x ≤ 0"], answer: 1 },
+            { id: 47, subject: "Math", question: "Solve: |2x - 5| = 3", options: ["x = 1 or x = 4", "x = 4 or x = 1", "x = 1 only", "x = 4 only"], answer: 0 },
+            { id: 48, subject: "Math", question: "What is the sum of the first 10 natural numbers?", options: ["45", "50", "55", "60"], answer: 2 },
+            { id: 49, subject: "Math", question: "If P = {1, 2, 3} and Q = {3, 4, 5}, what is P ∪ Q?", options: ["{3}", "{1, 2, 3, 4, 5}", "{1, 2, 4, 5}", "{1, 2}"], answer: 1 },
+            { id: 50, subject: "Math", question: "What is the derivative of sin(x)?", options: ["cos(x)", "-cos(x)", "sin(x)", "-sin(x)"], answer: 0 }
+        ],
+        "SSS2": [
+            { id: 1, subject: "English", question: "Choose the word nearest in meaning to 'Obfuscate'.", options: ["Clarify", "Confuse", "Explain", "Reveal"], answer: 1 },
+            { id: 2, subject: "English", question: "Identify the literary device: 'The pen is mightier than the sword.'", options: ["Metonymy", "Synecdoche", "Metaphor", "Simile"], answer: 0 },
+            { id: 3, subject: "English", question: "Which sentence contains a dangling modifier?", options: ["Walking down the street, the trees looked beautiful.", "Walking down the street, I saw beautiful trees.", "I saw beautiful trees while walking.", "The trees were beautiful as I walked."], answer: 0 },
+            { id: 4, subject: "English", question: "What is the term for a word that sounds like what it describes (e.g., buzz)?", options: ["Alliteration", "Onomatopoeia", "Assonance", "Consonance"], answer: 1 },
+            { id: 5, subject: "English", question: "Choose the correct spelling:", options: ["Supersede", "Supercede", "Supersede", "Supersead"], answer: 0 },
+            { id: 6, subject: "English", question: "What is the antonym of 'Pragmatic'?", options: ["Practical", "Idealistic", "Realistic", "Sensible"], answer: 1 },
+            { id: 7, subject: "English", question: "Identify the type of clause: 'The man who called yesterday is here.'", options: ["Adverbial clause", "Adjectival/Relative clause", "Noun clause", "Main clause"], answer: 1 },
+            { id: 8, subject: "English", question: "What is the plural of 'Appendix' in a medical context?", options: ["Appendixes", "Appendices", "Appendicies", "Appendiceses"], answer: 1 },
+            { id: 9, subject: "English", question: "Choose the correct idiom: 'To see eye to eye' means to:", options: ["Stare at each other", "Agree completely", "Argue", "Ignore each other"], answer: 1 },
+            { id: 10, subject: "English", question: "Which word is an oxymoron?", options: ["Deafening silence", "Very loud", "Quiet room", "Silent night"], answer: 0 },
+            { id: 11, subject: "English", question: "What is the study of the origin of words called?", options: ["Etymology", "Entomology", "Epidemiology", "Ecology"], answer: 0 },
+            { id: 12, subject: "English", question: "Identify the correct sentence:", options: ["Neither the students nor the teacher were ready.", "Neither the students nor the teacher was ready.", "Neither the students or the teacher was ready.", "Neither the students nor the teacher are ready."], answer: 1 },
+            { id: 13, subject: "English", question: "What is a 'soliloquy' in drama?", options: ["A conversation between two people", "A speech spoken alone on stage", "A whisper", "A chorus"], answer: 1 },
+            { id: 14, subject: "English", question: "Choose the synonym for 'Eloquent'.", options: ["Speechless", "Articulate", "Confused", "Quiet"], answer: 1 },
+            { id: 15, subject: "English", question: "Which punctuation mark is used to show possession?", options: ["Comma", "Semicolon", "Apostrophe", "Hyphen"], answer: 2 },
+            { id: 16, subject: "English", question: "What is the meaning of 'Cacophony'?", options: ["Harmonious sound", "Harsh, discordant sound", "Silence", "Melody"], answer: 1 },
+            { id: 17, subject: "English", question: "Identify the figure of speech: 'I have told you a million times.'", options: ["Metaphor", "Simile", "Hyperbole", "Personification"], answer: 2 },
+            { id: 18, subject: "English", question: "Choose the correct word: 'The effect/affect of the medicine was immediate.'", options: ["Effect", "Affect", "Affects", "Effecting"], answer: 0 },
+            { id: 19, subject: "English", question: "What is an 'anagram'?", options: ["A word spelled backward", "A word formed by rearranging letters", "A synonym", "A palindrome"], answer: 1 },
+            { id: 20, subject: "English", question: "Which sentence uses the colon correctly?", options: ["I bought: apples, oranges, and bananas.", "I bought three fruits: apples, oranges, and bananas.", "I bought: three fruits.", "I: bought fruits."], answer: 1 },
+            { id: 21, subject: "English", question: "What is the antonym of 'Mundane'?", options: ["Ordinary", "Extraordinary", "Boring", "Common"], answer: 1 },
+            { id: 22, subject: "English", question: "Identify the correct spelling:", options: ["Millieu", "Milieu", "Milieu", "Millieau"], answer: 1 },
+            { id: 23, subject: "English", question: "What is a 'protagonist'?", options: ["The villain", "The main character", "The narrator", "A minor character"], answer: 1 },
+            { id: 24, subject: "English", question: "Choose the correct preposition: 'He was accused ___ theft.'", options: ["with", "of", "for", "about"], answer: 1 },
+            { id: 25, subject: "English", question: "What is the meaning of 'Altruistic'?", options: ["Selfish", "Selfless", "Greedy", "Angry"], answer: 1 },
+            { id: 26, subject: "Math", question: "Differentiate y = 3x² + 2x - 5", options: ["6x + 2", "6x - 2", "3x + 2", "6x² + 2"], answer: 0 },
+            { id: 27, subject: "Math", question: "Evaluate: ∫(2x + 3)dx", options: ["x² + 3x + C", "2x² + 3x + C", "x² + 3 + C", "2 + C"], answer: 0 },
+            { id: 28, subject: "Math", question: "If A = [[1, 2], [3, 4]], what is 2A?", options: ["[[2, 4], [6, 8]]", "[[1, 4], [6, 8]]", "[[2, 2], [3, 4]]", "[[3, 6], [9, 12]]"], answer: 0 },
+            { id: 29, subject: "Math", question: "Find the 10th term of the GP: 2, 6, 18, ...", options: ["2 × 3", "2 × 3¹⁰", "3 × 2⁹", "2 × 9³"], answer: 0 },
+            { id: 30, subject: "Math", question: "Solve: log(x) + log(x-3) = 1 (base 10)", options: ["x=5", "x=-2", "x=5 or x=-2", "x=10"], answer: 0 },
+            { id: 31, subject: "Math", question: "What is the value of sin(90°) + cos(0°)?", options: ["0", "1", "2", "-1"], answer: 2 },
+            { id: 32, subject: "Math", question: "Find the equation of the line passing through (1,2) and (3,6).", options: ["y = 2x", "y = 2x + 1", "y = x + 2", "y = 3x - 1"], answer: 0 },
+            { id: 33, subject: "Math", question: "If P(A) = 0.4 and P(B) = 0.5, and they are independent, find P(A∩B).", options: ["0.9", "0.1", "0.2", "0.45"], answer: 2 },
+            { id: 34, subject: "Math", question: "Simplify: (1 + i)(1 - i) where i = √-1", options: ["0", "1", "2", "-1"], answer: 2 },
+            { id: 35, subject: "Math", question: "Find the maximum value of y = -x² + 4x.", options: ["2", "4", "8", "0"], answer: 1 },
+            { id: 36, subject: "Math", question: "What is the sum to infinity of the GP: 8, 4, 2, ...?", options: ["12", "16", "20", "8"], answer: 1 },
+            { id: 37, subject: "Math", question: "Solve: 2sin(θ) = 1 for 0 ≤ θ ≤ 90°", options: ["30°", "45°", "60°", "90°"], answer: 0 },
+            { id: 38, subject: "Math", question: "Find the variance of the data: 2, 4, 4, 4, 5, 5, 7, 9.", options: ["2", "4", "5", "7"], answer: 0 },
+            { id: 39, subject: "Math", question: "Differentiate y = sin(2x)", options: ["cos(2x)", "2cos(2x)", "-2cos(2x)", "2sin(2x)"], answer: 1 },
+            { id: 40, subject: "Math", question: "Evaluate: 5! / 3!", options: ["10", "20", "60", "120"], answer: 1 },
+            { id: 41, subject: "Math", question: "If f(x) = x² - 1, find f(f(2)).", options: ["3", "8", "15", "24"], answer: 1 },
+            { id: 42, subject: "Math", question: "Find the area bounded by y = x², x=0, x=2, and the x-axis.", options: ["4/3", "8/3", "4", "8"], answer: 1 },
+            { id: 43, subject: "Math", question: "Solve the inequality: x² - 4 > 0", options: ["-2 < x < 2", "x > 2 or x < -2", "x > 2", "x < -2"], answer: 1 },
+            { id: 44, subject: "Math", question: "What is the remainder when x³ - 2x + 1 is divided by (x-1)?", options: ["0", "1", "-1", "2"], answer: 0 },
+            { id: 45, subject: "Math", question: "Find the inverse of the function f(x) = 2x + 3.", options: ["(x-3)/2", "(x+3)/2", "2x - 3", "(x-2)/3"], answer: 0 },
+            { id: 46, subject: "Math", question: "Calculate the standard deviation of: 1, 3, 5.", options: ["√(8/3)", "√(8/2)", "2", "√2"], answer: 0 },
+            { id: 47, subject: "Math", question: "If tan(θ) = 1, what is θ (acute)?", options: ["30°", "45°", "60°", "90°"], answer: 1 },
+            { id: 48, subject: "Math", question: "Find the coordinates of the vertex of y = x² - 6x + 8.", options: ["(3, -1)", "(-3, 1)", "(3, 1)", "(-3, -1)"], answer: 0 },
+            { id: 49, subject: "Math", question: "Evaluate: lim(x→2) (x² - 4)/(x - 2)", options: ["0", "2", "4", "Undefined"], answer: 2 },
+            { id: 50, subject: "Math", question: "What is the probability of drawing an Ace from a standard deck of 52 cards?", options: ["1/52", "1/13", "1/4", "4/52"], answer: 1 }
+        ]
+    };
+
+    // --- 3. STATE VARIABLES ---
+    let studentName = "", studentEmail = "", selectedClass = "";
+    let currentQuestions = [], currentIndex = 0, userAnswers = [];
+    let timerInterval, timeInSeconds = 3600; // 60 minutes
+    let violations = 0;
+    const MAX_VIOLATIONS = 3;
+    let examActive = false;
+
+    // --- 4. ANTI-CHEAT ENGINE ---
+    function handleViolation(reason) {
+        if (!examActive) return;
+        violations++;
+        document.getElementById('violation-count').innerText = violations;
+        document.getElementById('warning-box').style.display = 'block';
+        if (violations >= MAX_VIOLATIONS) {
+            alert("EXAM TERMINATED: Too many violations.");
+            submitExam();
+        }
+    }
+    document.addEventListener('visibilitychange', () => { if (document.hidden && examActive) handleViolation("Left tab."); });
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && examActive) {
+            handleViolation("Exited fullscreen.");
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+    });
+    document.addEventListener('contextmenu', (e) => { if(examActive) e.preventDefault(); });
+    document.addEventListener('keydown', (e) => {
+        if (!examActive) return;
+        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 'p' || e.key === 'a')) {
+            e.preventDefault(); handleViolation("Restricted shortcut.");
+        }
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+            e.preventDefault(); handleViolation("DevTools attempt.");
+        }
+    });
+
+    // --- 5. EXAM LOGIC ---
+    async function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        studentEmail = document.getElementById('student-email').value.trim().toLowerCase();
+        selectedClass = document.getElementById('class-select').value;
+        const enteredCode = document.getElementById('access-code').value.trim().toUpperCase();
+
+        if (!studentName || !studentEmail || !selectedClass || !enteredCode) {
+            alert("Please fill in all fields."); return;
+        }
+
+        // --- SECURE CODE VALIDATION ---
+        try {
+            const querySnapshot = await db.collection("valid_codes").where("code", "==", enteredCode).limit(1).get();
+            if (querySnapshot.empty) {
+                alert("Invalid Access Code. Please ensure you have paid and received a valid code."); return;
+            }
+            const codeDoc = querySnapshot.docs[0];
+            const codeData = codeDoc.data();
+            if (codeData.isUsed === true) {
+                alert("This Access Code has already been used. Contact the school if this is an error."); return;
+            }
+            // Mark as used immediately to prevent sharing
+            await db.collection("valid_codes").doc(codeDoc.id).update({
+                isUsed: true, usedBy: studentName, usedByEmail: studentEmail, usedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Network error. Please check your internet."); return;
+        }
+
+        // --- START EXAM ---
+        currentQuestions = [...questionBank[selectedClass]];
+        currentQuestions.sort(() => Math.random() - 0.5);
+        userAnswers = new Array(currentQuestions.length).fill(-1);
+
+        document.documentElement.requestFullscreen().catch(() => {});
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('exam-screen').classList.remove('hidden');
+        document.getElementById('total-q').innerText = currentQuestions.length;
+        
+        examActive = true;
+        loadQuestion();
+        startTimer();
+    }
+
+    function loadQuestion() {
+        const q = currentQuestions[currentIndex];
+        document.getElementById('current-q').innerText = currentIndex + 1;
+        document.getElementById('question-text').innerText = q.question;
+        document.getElementById('subject-tag').innerText = q.subject;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const label = document.createElement('label');
+            const radio = document.createElement('input');
+            radio.type = 'radio'; radio.name = 'option'; radio.value = index;
+            if (userAnswers[currentIndex] === index) radio.checked = true;
+            radio.onchange = () => userAnswers[currentIndex] = index;
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(opt));
+            container.appendChild(label);
+        });
+        document.getElementById('next-btn').innerText = (currentIndex === currentQuestions.length - 1) ? "Finish" : "Next Question";
+    }
+
+    function nextQuestion() {
+        if (currentIndex < currentQuestions.length - 1) { currentIndex++; loadQuestion(); } 
+        else { submitExam(); }
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeInSeconds--;
+            const mins = Math.floor(timeInSeconds / 60);
+            const secs = timeInSeconds % 60;
+            document.getElementById('time-left').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if (timeInSeconds <= 0) { clearInterval(timerInterval); alert("Time is up!"); submitExam(); }
+        }, 1000);
+    }
+
+    async function submitExam() {
+        examActive = false;
+        clearInterval(timerInterval);
+        if (document.fullscreenElement) document.exitFullscreen();
+
+        let totalScore = 0, englishScore = 0, mathScore = 0;
+        currentQuestions.forEach((q, index) => {
+            if (userAnswers[index] === q.answer) {
+                totalScore++;
+                if (q.subject === "English") englishScore++;
+                if (q.subject === "Math") mathScore++;
+            }
+        });
+
+        document.getElementById('exam-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = totalScore;
+        document.getElementById('english-score').innerText = englishScore;
+        document.getElementById('math-score').innerText = mathScore;
+        document.getElementById('result-message').innerText = totalScore >= 25 ? "Congratulations! You passed." : "You did not meet the cutoff.";
+
+        try {
+            await db.collection("exam_results").add({
+                name: studentName, email: studentEmail, class: selectedClass,
+                total_score: totalScore, english_score: englishScore, math_score: mathScore,
+                violations: violations, passed: totalScore >= 25,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (error) { console.error("Save error:", error); }
+    }
+</script>
+</body>
+</html>
